@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -24,6 +25,7 @@ public class Asteroid implements Entity, Collidable {
     private final Vector2 position;
     private float speed;
     private final Rectangle area;
+    private Polygon polygon;
     private float orientation;
     private float angularSpeed;
 
@@ -33,6 +35,7 @@ public class Asteroid implements Entity, Collidable {
         bounds = new Rectangle();
         circle = new Circle();
         orientation = 0;
+        polygon = new Polygon();
         recycle(0);
     }
 
@@ -44,6 +47,7 @@ public class Asteroid implements Entity, Collidable {
             vertices[i] = MathUtils.cos(angle) * radius * (MathUtils.random(0.5f) + 0.5f);
             vertices[i + 1] = MathUtils.sin(angle) * radius * (MathUtils.random(0.5f) + 0.5f);
         }
+        polygon.setVertices(vertices);
     }
 
     @Override
@@ -52,6 +56,8 @@ public class Asteroid implements Entity, Collidable {
         bounds.y = position.y - radius;
         circle.y = position.y;
         orientation += angularSpeed * dt;
+        polygon.setRotation(orientation);
+        polygon.setPosition(position.x, position.y);
     }
 
     @Override
@@ -60,7 +66,7 @@ public class Asteroid implements Entity, Collidable {
         renderer.identity();
         renderer.translate(position.x, position.y, 0);
         renderer.rotate(0, 0, 1, orientation);
-        renderer.polygon(vertices);
+        renderer.polygon(polygon.getVertices());
         if (Config.debug) {
             renderer.identity();
             renderer.setColor(Color.YELLOW);
@@ -82,23 +88,22 @@ public class Asteroid implements Entity, Collidable {
         radius = MathUtils.random(15, 25);
         bounds.set(position.x - radius, position.y, radius * 2, radius * 2);
         circle.set(position, radius);
-        speed = MathUtils.random(10f, 50f);
+//        speed = MathUtils.random(10f, 50f);
+        speed = 0;
         angularSpeed = MathUtils.random(30f, 100f);
         randomVertices();
     }
 
     @Override
     public boolean collidesWith(Collidable other) {
-        // Asteroid vs LaserShot: rect vs rect
+        // Asteroid vs LaserShot: rect vs circle
         // Asteroid vs Asteroid: circle vs circle
         // Asteroid vs Ship: circle vs circle
         // Asteroid vs Vortex: circle vs circle
 
-        if (other instanceof LaserShot) {
-            return Collision.rectsOverlap(bounds, other.getMinimumBoundingRectangle());
-        } else if (other instanceof Asteroid ||
-                other instanceof Ship ||
-                other instanceof VortexShot) {
+        if (other instanceof LaserShot || other instanceof Ship) {
+            return Collision.polygonsOverlap(polygon, other.getPolygon());
+        } else if (other instanceof VortexShot) {
             return Collision.circlesOverlap(circle, other.getMinimumEnclosingBall());
         } else {
             return false;
@@ -113,5 +118,10 @@ public class Asteroid implements Entity, Collidable {
     @Override
     public Circle getMinimumEnclosingBall() {
         return circle;
+    }
+    
+    @Override
+    public Polygon getPolygon(){
+        return polygon;
     }
 }

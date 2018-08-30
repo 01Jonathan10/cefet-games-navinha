@@ -7,6 +7,7 @@ import br.cefetmg.games.collision.Collision;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -57,11 +58,8 @@ public class VortexShot implements Shot {
 
     @Override
     public boolean collidesWith(Collidable other) {
-        // Vortex vs Laser: rect vs rect
         // Vortex vs Asteroid: circle vs circle
-        if (other instanceof LaserShot) {
-            return Collision.rectsOverlap(bounds, other.getMinimumBoundingRectangle());
-        } else if (other instanceof Asteroid) {
+        if (other instanceof Asteroid) {
             return Collision.circlesOverlap(circle, other.getMinimumEnclosingBall());
         } else {
             return false;
@@ -76,5 +74,10 @@ public class VortexShot implements Shot {
     @Override
     public Circle getMinimumEnclosingBall() {
         return circle;
+    }
+    
+    @Override
+    public Polygon getPolygon(){
+        return null;
     }
 }

@@ -9,6 +9,7 @@ import br.cefetmg.games.weapons.Weapon;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -40,6 +41,7 @@ public class Ship implements Entity, Collidable {
     private final float scale;
     private final Rectangle area;
     private final Circle circle;
+    private final Polygon polygon;
     private final Array<Weapon> weapons;
     private int currentWeaponIndex;
     private long lastShotMillis;
@@ -52,6 +54,7 @@ public class Ship implements Entity, Collidable {
         area.getCenter(position);
         position.scl(1, 0.15f);
         circle = new Circle(position, scale);
+        polygon = new Polygon(VERTICES);
 
         weapons = new Array<Weapon>(new Weapon[]{
             new LaserWeapon(
@@ -106,6 +109,7 @@ public class Ship implements Entity, Collidable {
         }
         keepWithinBounds();
         circle.x = position.x;
+        polygon.setPosition(position.x, position.y);
     }
 
     @Override
@@ -134,7 +138,7 @@ public class Ship implements Entity, Collidable {
         // Ship vs Vortex: nada
         // Ship vs Asteroid: circle vs circle
         if (other instanceof Asteroid) {
-            return Collision.circlesOverlap(circle, other.getMinimumEnclosingBall());
+            return Collision.polygonsOverlap(polygon, other.getPolygon());
         } else {
             return false;
         }
@@ -153,5 +157,10 @@ public class Ship implements Entity, Collidable {
     @Override
     public Circle getMinimumEnclosingBall() {
         return circle;
+    }
+    
+    @Override
+    public Polygon getPolygon() {
+        return polygon;
     }
 }

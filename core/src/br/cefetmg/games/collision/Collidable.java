@@ -1,6 +1,7 @@
 package br.cefetmg.games.collision;
 
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
@@ -35,4 +36,6 @@ public interface Collidable {
      * @return um círculo.
      */
     Circle getMinimumEnclosingBall();
+    
+    Polygon getPolygon();
 }
